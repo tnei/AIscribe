@@ -1,1 +1,2 @@
-pip install streamlit openai
+streamlit==1.1.0
+openai==0.10.2
