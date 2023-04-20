@@ -2,7 +2,7 @@ import streamlit as st
 import openai
 
 # Authenticate with OpenAI
-openai.api_key = "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"
+openai.api_key = "YOUR_API_KEY_HERE"
 
 # Define the prompt
 prompt = "Write a blog post on the following topic:"
@@ -30,10 +30,29 @@ def app():
     body = st.text_area("Body:")
     conclusion = st.text_area("Conclusion:")
 
+    # Add text formatting options
+    bold_intro = st.checkbox("Bold introduction")
+    italic_body = st.checkbox("Italic body")
+    bullets_conclusion = st.checkbox("Bulleted conclusion")
+
     # Generate the blog post
     if st.button("Generate"):
         # Construct the prompt
-        full_prompt = f"{prompt} {option}\n\nTitle: {title}\n\nIntroduction: {intro}\n\nBody: {body}\n\nConclusion: {conclusion}"
+        full_prompt = f"{prompt} {option}\n\nTitle: {title}\n\nIntroduction:"
+        if bold_intro:
+            full_prompt += f" **{intro}**"
+        else:
+            full_prompt += f" {intro}"
+        full_prompt += f"\n\nBody:"
+        if italic_body:
+            full_prompt += f" *{body}*"
+        else:
+            full_prompt += f" {body}"
+        full_prompt += f"\n\nConclusion:"
+        if bullets_conclusion:
+            full_prompt += f"\n- {conclusion}"
+        else:
+            full_prompt += f" {conclusion}"
 
         # Generate the blog post
         response = openai.Completion.create(
