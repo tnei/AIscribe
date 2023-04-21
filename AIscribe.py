@@ -2,7 +2,7 @@ import streamlit as st
 import openai
 
 # Authenticate with OpenAI
-openai.api_key = "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"
+openai.api_key = "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"
 
 # Define the prompt
 prompt = "Write a blog post on the following topic:"
