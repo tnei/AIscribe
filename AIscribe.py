@@ -1,8 +1,18 @@
+import config
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/get-api-key")
+async def get_api_key():
+    return {"api_key": config.API_KEY}
+Client-side code (app.py):
+
+python
+Copy code
+import requests
 import streamlit as st
 import openai
-
-# Authenticate with OpenAI
-openai.api_key = "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"
 
 # Define the prompt
 prompt = "Write a blog post on the following topic:"
@@ -16,6 +26,20 @@ options = {
     5: "Internet of Things",
     6: "Quantum Computing"
 }
+
+# Define the API endpoint
+API_ENDPOINT = "http://localhost:8000/get-api-key"
+
+# Get the API key from the server
+response = requests.get(API_ENDPOINT)
+if response.status_code == 200:
+    api_key = response.json()["api_key"]
+else:
+    st.error("Failed to retrieve API key.")
+    st.stop()
+
+# Authenticate with OpenAI
+openai.api_key = api_key
 
 # Define the Streamlit app
 def app():
@@ -45,27 +69,30 @@ def app():
             full_prompt += f" {intro}"
         full_prompt += f"\n\nBody:"
         if italic_body:
-            full_prompt += f" *{body}*"
+            full_prompt += f" _{body}_"
         else:
             full_prompt += f" {body}"
         full_prompt += f"\n\nConclusion:"
         if bullets_conclusion:
-            full_prompt += f"\n- {conclusion}"
+            bullet_points = conclusion.split("\n")
+            for bullet_point in bullet_points:
+                full_prompt += f"\n- {bullet_point}"
         else:
             full_prompt += f" {conclusion}"
 
-        # Generate the blog post
-        response = openai.Completion.create(
-            engine="davinci",
-            prompt=full_prompt,
-            max_tokens=1024,
-            n=1,
-            stop=None,
-            temperature=0.5
-        )
-
-        # Display the blog post
-        st.write(response.choices[0].text)
-
-if __name__ == "__main__":
-    app()
+        # Generate the blog post using GPT-3
+        try:
+            response = openai.Completion.create(
+                engine="davinci",
+                prompt=full_prompt,
+                max_tokens=1024,
+                n=1,
+                stop=None,
+                temperature=0.5,
+            )
+            post = response.choices[0].text.strip()
+            st.success("Blog post generated!")
+            st.write(post)
+        except Exception as e:
+            st.error("Failed to generate blog post.")
+            st.error(e)
